@@ -1,0 +1,20 @@
+image: docker:20.10.16
+
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+
+services:
+  - docker:20.10.16-dind
+  
+stages:
+  - build
+
+build-job:
+  stage: build
+  image: docker:dind 
+  script:
+    - docker login -u $DOCKER_REGISTRY_USER -p $DOCKER_REGISTRY_PASSWORD
+    - docker build -t broc1603/game-stat-api --build-arg connection_string=$DB_CONNECTION_STRING --build-arg jwt_security_key=$JWT_SECURITY_KEY --build-arg lol_base_url=$LOL_BASE_URL --build-arg tft_base_url=$TFT_BASE_URL --build-arg lor_base_url=$LOR_BASE_URL .
+    - docker push broc1603/game-stat-api
+  rules:
+     - if: '$CI_COMMIT_BRANCH == "main"'
